@@ -1,0 +1,111 @@
+{
+    "type": "object",
+    "title": "TransactionsHistory",
+    "properties": {
+      "transactions": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "title": "TransactionLite",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "ID"
+            },
+            "transaction_id": {
+              "type": "string",
+              "description": "Transaction ID"
+            },
+            "user": {
+              "type": "string",
+              "description": "User email"
+            },
+            "type": {
+              "type": "string",
+              "description": "Type"
+            },
+            "status": {
+              "type": "string",
+              "description": "Status"
+            },
+            "timestamp": {
+              "type": "string",
+              "description": "Timestamp"
+            },
+            "currency": {
+              "type": "string",
+              "description": "Currency"
+            },
+            "amount": {
+              "type": "number",
+              "description": "Amount"
+            },
+            "transaction_code": {
+              "type": "string",
+              "description": "Transaction Code"
+            },
+            "product_summary": {
+              "type": "string",
+              "description": "Product Summary"
+            },
+            "installments_count": {
+              "type": "number",
+              "description": "Installments count"
+            },
+            "payment_type": {
+              "type": "string",
+              "description": "Payment Type"
+            },
+            "card_type": {
+              "type": "string",
+              "description": "Card Type"
+            },
+            "payouts_total": {
+              "type": "number",
+              "description": "Payouts Total"
+            },
+            "payouts_received": {
+              "type": "number",
+              "description": "Payouts Received"
+            },
+            "payout_date": {
+              "type": "string",
+              "description": "Payout date &#40;if paid out at once&#41;"
+            },
+            "payout_plan": {
+              "type": "string",
+              "description": "Payout plan at the time the transaction was made"
+            },
+            "payout_type": {
+              "type": "string",
+              "enum": ["BANK_ACCOUNT", "PREPAID_CARD", "BALANCE"]
+            }
+          }
+        },
+        "description": "Collection of history items"
+      },
+      "links": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "title": "Link",
+          "properties": {
+            "rel": {
+              "type": "string",
+              "description": "Relation"
+            },
+            "href": {
+              "type": "string",
+              "description": "Location"
+            },
+            "type": {
+              "type": "string",
+              "description": "Mime type"
+            }
+          }
+        },
+        "description": "Collection of links.Currently next page link"
+      }
+    },
+    "$schema": "http://json-schema.org/draft-04/schema#"
+}

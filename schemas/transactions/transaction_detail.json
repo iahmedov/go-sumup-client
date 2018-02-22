@@ -1,0 +1,333 @@
+{
+    "type": "object",
+    "title": "Transaction",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "Transaction id"
+      },
+      "transaction_code": {
+        "type": "string",
+        "description": "Transaction code"
+      },
+      "foreign_transaction_id": {
+        "type": "string",
+        "description": "Foreign transaction id &#40;passed by clients&#41;"
+      },
+      "merchant_code": {
+        "type": "string",
+        "description": "Merchant code"
+      },
+      "username": {
+        "type": "string",
+        "description": "Username of the user who made the transactions"
+      },
+      "amount": {
+        "type": "number",
+        "description": "Transaction amount"
+      },
+      "vat_amount": {
+        "type": "number",
+        "description": "Transaction VAT amount"
+      },
+      "tip_amount": {
+        "type": "number",
+        "description": "Tip amount &#40;included in transaction amount&#41;"
+      },
+      "currency": {
+        "type": "string",
+        "description": "Transaction currency"
+      },
+      "timestamp": {
+        "type": "string",
+        "description": "Time created"
+      },
+      "lat": {
+        "type": "number",
+        "description": "Latitude"
+      },
+      "lon": {
+        "type": "number",
+        "description": "Longitude"
+      },
+      "horizontal_accuracy": {
+        "type": "number",
+        "description": "Position precision"
+      },
+      "status": {
+        "type": "string",
+        "description": "Transaction processing status"
+      },
+      "payment_type": {
+        "type": "string",
+        "description": "Transaction type"
+      },
+      "simple_payment_type": {
+        "type": "string",
+        "description": "Simple name for each payment method"
+      },
+      "entry_mode": {
+        "type": "string",
+        "description": "Transaction entry mode"
+      },
+      "verification_method": {
+        "type": "string",
+        "description": "Cardholder verification method"
+      },
+      "card": {
+        "type": "object",
+        "properties": {
+          "last_4_digits": {
+            "type": "string",
+            "description": "Card last 4 digits"
+          },
+          "type": {
+            "type": "string",
+            "description": "Card Scheme"
+          }
+        },
+        "description": "Card information"
+      },
+      "elv_account": {
+        "type": "object",
+        "properties": {
+          "sort_code": {
+            "type": "string",
+            "description": "Elv card sort code"
+          },
+          "last_4_digits": {
+            "type": "string",
+            "description": "Elv card account number last 4 digits"
+          },
+          "sequence_no": {
+            "type": "string",
+            "description": "Elv card sequence number"
+          },
+          "iban": {
+            "type": "string",
+            "description": "Elv iban"
+          }
+        },
+        "description": "Elv bank account"
+      },
+      "product_summary": {
+        "type": "string",
+        "description": "Product summary"
+      },
+      "local_time": {
+        "type": "string",
+        "description": "Creation time in the timezone of the device on which the transaction was made"
+      },
+      "payout_date": {
+        "type": "string",
+        "description": "The date of the payout"
+      },
+      "payout_plan": {
+        "type": "string",
+        "description": "Payout plan at the time the transaction was made"
+      },
+      "payout_type": {
+        "type": "string",
+        "description": "Payout type of the most recent paid-out for this transaction"
+      },
+      "installments_count": {
+        "type": "number",
+        "description": "Number of installments"
+      },
+      "process_as": {
+        "type": "string",
+        "description": "Debit/Credit"
+      },
+      "products": {
+        "type": "object",
+        "title": "Product",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Product name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Product Description"
+          },
+          "price": {
+            "type": "number",
+            "description": "Product price"
+          },
+          "vat_rate": {
+            "type": "number",
+            "description": "undefined"
+          },
+          "single_vat_amount": {
+            "type": "number",
+            "description": "undefined"
+          },
+          "price_with_vat": {
+            "type": "number",
+            "description": "Product price incl. VAT"
+          },
+          "vat_amount": {
+            "type": "number",
+            "description": "undefined"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Product quantity"
+          },
+          "total_price": {
+            "type": "number",
+            "description": "Quantity x product price"
+          },
+          "total_with_vat": {
+            "type": "number",
+            "description": "Total price incl. VAT"
+          }
+        },
+        "description": "Purchase products"
+      },
+      "transaction_events": {
+        "type": "object",
+        "title": "TransactionEvent",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Event ID"
+          },
+          "event_type": {
+            "description": "(optional) - Type of the transaction event. Possible values",
+            "enum": ["PAYOUT", "CHARGE_BACK", "REFUND"],
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status of the event"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount"
+          },
+          "due_date": {
+            "type": "string",
+            "description": "The date when the event is due to occur"
+          },
+          "date": {
+            "type": "string",
+            "description": "The date when this event occurred"
+          },
+          "installment_number": {
+            "type": "number",
+            "description": "The number of installment that was payed out in case of a PAYOUT event"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Time created"
+          }
+        },
+        "description": "A list of transaction events such as payouts, refunds and chargebacks"
+      },
+      "simple_status": {
+        "enum": ["CANCEL_FAILED", "CANCELLED", "CHARGEBACK", "FAILED", "REFUND_FAILED", "REFUNDED", "SUCCESSFUL"],
+        "description": "(optional) - Simple status generated from processing status and latest transaction state",
+        "type": "string"
+      },
+      "links": {
+        "type": "object",
+        "title": "Link",
+        "properties": {
+          "rel": {
+            "type": "string",
+            "description": "Relation"
+          },
+          "href": {
+            "type": "string",
+            "description": "Location"
+          },
+          "type": {
+            "type": "string",
+            "description": "Mime type"
+          }
+        },
+        "description": "A list with links to related resources"
+      },
+      "events": {
+        "type": "object",
+        "title": "Event",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Event ID"
+          },
+          "transaction_id": {
+            "type": "string",
+            "description": "Parent transaction ID"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the transaction event",
+            "enum": ["PAYOUT", "CHARGE_BACK", "REFUND", "PAYOUT_DEDUCTION"]
+          },
+          "status": {
+            "type": "string",
+            "description": "Status of the event"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Time created"
+          },
+          "fee_amount": {
+            "type": "number",
+            "description": "Fee amount"
+          },
+          "receipt_no": {
+            "type": "string",
+            "description": "Receipt number for receipt"
+          }
+        },
+        "description": "A list with transaction events"
+      },
+      "payouts_received": {
+        "type": "number",
+        "description": "Number of payouts that were actually paid out &#40;excludes partial chargeback deductions&#41;"
+      },
+      "payouts_total": {
+        "type": "number",
+        "description": "Total number of payouts in which the transaction is &#40;to&#41; be paid out"
+      },
+      "location": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "description": "undefined"
+          },
+          "lon": {
+            "type": "number",
+            "description": "undefined"
+          },
+          "horizontal_accuracy": {
+            "type": "number",
+            "description": "undefined"
+          }
+        },
+        "description": "Location information"
+      },
+      "tax_enabled": {
+        "type": "boolean",
+        "description": "True if transaction is made in advanced mode"
+      },
+      "auth_code": {
+        "type": "string",
+        "description": "Authorization code"
+      },
+      "internal_id": {
+        "type": "number",
+        "description": "The internal transaction ID"
+      }
+    },
+    "description": "<p>&nbsp;</p>",
+    "$schema": "http://json-schema.org/draft-04/schema#"
+  }
