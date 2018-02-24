@@ -2,13 +2,22 @@ package client
 
 import (
 	"sync"
+	"time"
 )
 
-type Token = string
+type Token struct {
+	Value string
+	ValidUntil time.Time
+}
 
 type TokenSource interface {
 	AccessToken() (*Token, error)
 	RefreshToken() (*Token, error)
+}
+
+type tokenSourceSetter interface {
+	setAccessToken(token *Token)
+	setRefreshToken(token *Token)
 }
 
 type LockableTokenSource struct {
@@ -43,3 +52,4 @@ func (ts *LockableTokenSource) setRefreshToken(token *Token) {
 }
 
 var _ TokenSource = (*LockableTokenSource)(nil)
+var _ tokenSourceSetter = (*LockableTokenSource)(nil)
