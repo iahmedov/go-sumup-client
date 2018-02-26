@@ -2,50 +2,44 @@ package client
 
 import (
 	"sync"
-	"time"
+
+	sb "github.com/iahmedov/go-sumup-client/schemas/base"
 )
 
-type Token struct {
-	Value string
-	ValidUntil time.Time
-}
-
 type TokenSource interface {
-	AccessToken() (*Token, error)
-	RefreshToken() (*Token, error)
+	AccessToken() (sb.Token, error)
+	RefreshToken() (sb.Token, error)
 }
 
 type tokenSourceSetter interface {
-	setAccessToken(token *Token)
-	setRefreshToken(token *Token)
+	setAccessToken(token *sb.Token)
+	setRefreshToken(token *sb.Token)
 }
 
 type LockableTokenSource struct {
-	access, refresh Token
+	access, refresh       sb.Token
 	mtxAccess, mtxRefresh sync.RWMutex
 }
 
-func (ts *LockableTokenSource) AccessToken() (*Token, error) {
+func (ts *LockableTokenSource) AccessToken() (sb.Token, error) {
 	ts.mtxAccess.RLock()
 	defer ts.mtxAccess.RUnlock()
-	t := ts.access
-	return &t, nil
+	return ts.access, nil
 }
 
-func (ts *LockableTokenSource) RefreshToken() (*Token, error) {
+func (ts *LockableTokenSource) RefreshToken() (sb.Token, error) {
 	ts.mtxRefresh.RLock()
 	defer ts.mtxRefresh.RUnlock()
-	t := ts.refresh
-	return &t, nil
+	return ts.refresh, nil
 }
 
-func (ts *LockableTokenSource) setAccessToken(token *Token) {
+func (ts *LockableTokenSource) setAccessToken(token *sb.Token) {
 	ts.mtxAccess.Lock()
 	defer ts.mtxAccess.Unlock()
 	ts.access = *token
 }
 
-func (ts *LockableTokenSource) setRefreshToken(token *Token) {
+func (ts *LockableTokenSource) setRefreshToken(token *sb.Token) {
 	ts.mtxRefresh.Lock()
 	defer ts.mtxRefresh.Unlock()
 	ts.refresh = *token

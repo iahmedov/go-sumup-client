@@ -3,16 +3,37 @@ package client
 import (
 	"context"
 	"net/http"
+	"time"
+
+	sb "github.com/iahmedov/go-sumup-client/schemas/base"
+)
+
+const (
+	THRESHOLD_MIN_TOKEN_VALIDITY = time.Second * 10
+)
+
+var (
+	ENDPOINT = "https://api.sumup.com"
 )
 
 type Client struct {
 	Transactions TransactionsService
 
-	transport *Transport
+	httpClient           *http.Client
+	endpoint             string
+	ctxAutoRefresh       context.Context
 	ctxAutoRefreshCancel context.CancelFunc
 }
 
-func NewClient(access, refresh Token, httpClient *http.Client) (*Client, error) {
+func NewClient(access, refresh string, httpClient *http.Client) (*Client, error) {
+	accessToken := sb.Token{
+		Value:      access,
+		ValidUntil: time.Now().Add(-THRESHOLD_MIN_TOKEN_VALIDITY),
+	}
+	refreshToken := sb.Token{
+		Value:      refresh,
+		ValidUntil: time.Now().Add(-THRESHOLD_MIN_TOKEN_VALIDITY),
+	}
 
 	if httpClient == nil {
 		httpClient = http.DefaultClient
@@ -24,10 +45,10 @@ func NewClient(access, refresh Token, httpClient *http.Client) (*Client, error) 
 	}
 
 	t := &Transport{
-		Base:   baseTransport,
+		Base: baseTransport,
 		source: &LockableTokenSource{
-			access: access,
-			refresh: refresh,
+			access:  accessToken,
+			refresh: refreshToken,
 		},
 		auth: BearerTokenAuth,
 	}
@@ -35,44 +56,58 @@ func NewClient(access, refresh Token, httpClient *http.Client) (*Client, error) 
 
 	c := &Client{
 		// public facing services/modules
-		Transactions: newTransactionsService(httpClient),
+		Transactions: newTransactionsService(httpClient, ENDPOINT+"/v0.1"),
 
-		// internal
 		ctxAutoRefreshCancel: nil,
-		transport: t,
+		httpClient:           httpClient,
 	}
 
-	err := c.refreshToken()
-	if err != nil {
-		return nil, err
-	}
+	// err := c.refreshToken()
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	return c, nil
 }
 
-func (c *Client) AutoRefreshToken(enable bool) {
+// AutoRefreshToken enables auto refresh mode for tokens
+func (c *Client) AutoRefreshToken(enable bool) context.CancelFunc {
+	// TODO: what should we do when token expired or invalidated from server? should we respond to this case and try to
+	// get another token?
 	enabled := c.ctxAutoRefreshCancel != nil
 	if enabled == enable {
-		return
+		return c.ctxAutoRefreshCancel
 	}
 
 	if enable {
-		ctx, cancelFunc := context.WithCancel(context.Background())
-		c.ctxAutoRefreshCancel = cancelFunc
+		c.ctxAutoRefresh, c.ctxAutoRefreshCancel = context.WithCancel(context.Background())
 
 		go func(ctx context.Context) {
+			ts := c.tokenSource()
 			for {
+				token, _ := ts.AccessToken()
 				select {
 				case <-ctx.Done():
 					break
+				case <-time.After(time.Until(token.ValidUntil) - THRESHOLD_MIN_TOKEN_VALIDITY):
+					if time.Until(token.ValidUntil) > THRESHOLD_MIN_TOKEN_VALIDITY {
+						// probably updated manually.
+						// when token invalidated on the server side and client refreshed token by calling HandleError
+						continue
+					}
+
+					c.refreshToken()
+					break
 				}
 			}
-		}(ctx)
+		}(c.ctxAutoRefresh)
 
 	} else {
 		c.ctxAutoRefreshCancel()
+		c.ctxAutoRefresh = nil
 		c.ctxAutoRefreshCancel = nil
 	}
+	return c.ctxAutoRefreshCancel
 }
 
 func (c *Client) refreshToken() error {
@@ -80,15 +115,39 @@ func (c *Client) refreshToken() error {
 	access, _ := tokenSource.AccessToken()
 	refresh, _ := tokenSource.RefreshToken()
 
+	noAuthClient := *c.httpClient
+	transport, ok := noAuthClient.Transport.(*Transport)
+	if !ok {
+		panic("HTTP Client Transport must have *client.Transport type")
+	}
+
+	noAuthClient.Transport = &Transport{
+		Base:   transport.Base,
+		source: transport.source,
+		auth:   NoAuth,
+	}
+
+	noAuthClient.Get("refresh token here")
+
 	if ts, ok := tokenSource.(tokenSourceSetter); ok {
-		ts.setAccessToken(access)
-		ts.setRefreshToken(refresh)
+		ts.setAccessToken(&access)
+		ts.setRefreshToken(&refresh)
 		return nil
 	}
 
-	return ErrorImmutableTokenSource 
+	return ErrorImmutableTokenSource
 }
 
 func (c *Client) tokenSource() TokenSource {
-	return c.transport.source
+	if t, ok := c.httpClient.Transport.(*Transport); ok {
+		return t.source
+	}
+	return nil
+}
+
+func (c *Client) HandleError(err *sb.Error) error {
+	if err.IsTokenExpired() {
+		return c.refreshToken()
+	}
+	return nil
 }

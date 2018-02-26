@@ -2,11 +2,11 @@
     "type": "object",
     "title": "TransactionsHistory",
     "properties": {
-      "transactions": {
+      "items": {
         "type": "array",
         "items": {
           "type": "object",
-          "title": "TransactionLite",
+          "title": "TransactionHistoryItem",
           "properties": {
             "id": {
               "type": "string",
